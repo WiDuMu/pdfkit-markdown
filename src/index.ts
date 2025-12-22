@@ -40,6 +40,18 @@ export interface PdfkitMarkdownSettings {
   throwOnUnsupported: boolean;
 }
 
+function headerLookup(h: number) {
+  switch (h) {
+    case 1: return 32;
+    case 2: return 24;
+    case 3: return 18.72;
+    case 4: return 16;
+    case 5: return 13.28;
+    case 6: return 10.72;
+    default: return 16;
+  }
+}
+
 export class MarkdownRenderer {
   private settings: PdfkitMarkdownSettings = {
     blockQuoteIndent: 7,
@@ -55,7 +67,7 @@ export class MarkdownRenderer {
     boldFont: "Helvetica-Bold",
     italicFont: "Helvetica-Oblique",
     headerFontName: () => "Helvetica-Bold",
-    headerFontSize: (h) => 20 - h * 1.5,
+    headerFontSize: headerLookup,
     headerGapBefore: () => 12,
     headerGapAfter: () => 8,
     fontSize: 10,

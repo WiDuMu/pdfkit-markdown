@@ -36,6 +36,7 @@ export interface PdfkitMarkdownSettings {
   headerGapBefore: (depth: number) => number;
   /** Function to determine gap size after a header by depth */
   headerGapAfter: (depth: number) => number;
+  /**  */
   /** Throw error on unsupported markdown feature, otherwise silently ignored */
   throwOnUnsupported: boolean;
 }
@@ -194,6 +195,12 @@ export class MarkdownRenderer {
   }
 
   private handleHeading(heading: MDAST.Heading) {
+    if (heading.depth == 1) {
+      const textElement = heading.children.find(child => child.type == "text");
+      if (textElement) {
+        this.doc.outline.addItem(textElement.value);
+      }
+    }
     this.doc.y += this.settings.headerGapBefore(heading.depth);
     this.doc.font(this.settings.headerFontName(heading.depth));
     this.doc.fontSize(this.settings.headerFontSize(heading.depth));

@@ -67,7 +67,18 @@ export class MarkdownRenderer {
     boldFont: "Helvetica-Bold",
     italicFont: "Helvetica-Oblique",
     headerFontName: () => "Helvetica-Bold",
-    headerFontSize: headerLookup,
+    headerFontSize: (depth: number) => {
+      const size = this.settings.fontSize;
+      switch (depth) {
+        case 1: return 2 * size;
+        case 2: return 1.5 * size;
+        case 3: return 1.17 * size;
+        case 4: return 1 * size;
+        case 5: return 0.83 * size;
+        case 6: return 0.67 * size;
+        default: return 1 * size;
+      }
+    },
     headerGapBefore: () => 12,
     headerGapAfter: () => 8,
     fontSize: 10,

@@ -91,6 +91,7 @@ export class MarkdownRenderer {
     for (const c of tree.children) this.handleChild(c);
   }
 
+  private outlineStack: PDFKit.PDFOutline[] = [];
   private listIndent = 0;
   private bold = false;
   private italic = false;
@@ -195,12 +196,23 @@ export class MarkdownRenderer {
   }
 
   private handleHeading(heading: MDAST.Heading) {
+    const text = heading.children.find(child => child.type == "text")?.value;
     if (heading.depth == 1) {
-      const textElement = heading.children.find(child => child.type == "text");
-      if (textElement) {
-        this.doc.outline.addItem(textElement.value);
+      if (text) {
+        this.outlineStack = [];
+        this.outlineStack.push(this.doc.outline.addItem(text, { expanded: true }));
       }
+    } else if ((heading.depth - 1) < this.outlineStack.length) {
+      if (text) {
+        console.log(`creating subheading of depth ${heading.depth}`)
+        this.outlineStack.splice(heading.depth - 1);
+        this.outlineStack.push(this.outlineStack[this.outlineStack.length - 1].addItem(text, { expanded: true }));
+      }
+    } else {
+      this.outlineStack.push(this.outlineStack[this.outlineStack.length - 1].addItem(text, { expanded: true }));
     }
+    console.log(`Heading, Depth: ${heading.depth}, text: ${text}, stack length: ${this.outlineStack.length}, stack: ${this.outlineStack}`);
+
     this.doc.y += this.settings.headerGapBefore(heading.depth);
     this.doc.font(this.settings.headerFontName(heading.depth));
     this.doc.fontSize(this.settings.headerFontSize(heading.depth));

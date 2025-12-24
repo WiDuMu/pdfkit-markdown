@@ -82,6 +82,7 @@ export class MarkdownRenderer {
     for (const c of tree.children) this.handleChild(c);
   }
 
+  /** Used to keep track of the context for bookmark purposes */
   private outlineStack: PDFKit.PDFOutline[] = [];
   private listIndent = 0;
   private bold = false;

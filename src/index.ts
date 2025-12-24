@@ -36,7 +36,8 @@ export interface PdfkitMarkdownSettings {
   headerGapBefore: (depth: number) => number;
   /** Function to determine gap size after a header by depth */
   headerGapAfter: (depth: number) => number;
-  /**  */
+  /** Add outlines (bookmarks) based on the header */
+  displayHeaderOutlines: boolean;
   /** Throw error on unsupported markdown feature, otherwise silently ignored */
   throwOnUnsupported: boolean;
 }
@@ -71,6 +72,7 @@ export class MarkdownRenderer {
     headerFontSize: headerLookup,
     headerGapBefore: () => 12,
     headerGapAfter: () => 8,
+    displayHeaderOutlines: true,
     fontSize: 10,
     throwOnUnsupported: false,
   };
@@ -196,22 +198,16 @@ export class MarkdownRenderer {
   }
 
   private handleHeading(heading: MDAST.Heading) {
-    const text = heading.children.find(child => child.type == "text")?.value;
-    if (heading.depth == 1) {
+    if (this.settings.displayHeaderOutlines) {
+      const text = heading.children.find(child => child.type == "text")?.value;
       if (text) {
-        this.outlineStack = [];
-        this.outlineStack.push(this.doc.outline.addItem(text, { expanded: true }));
-      }
-    } else if ((heading.depth - 1) < this.outlineStack.length) {
-      if (text) {
-        console.log(`creating subheading of depth ${heading.depth}`)
-        this.outlineStack.splice(heading.depth - 1);
+        if (this.outlineStack.length == 0) {
+          this.outlineStack = [this.doc.outline];
+        }
+        this.outlineStack.splice(heading.depth);
         this.outlineStack.push(this.outlineStack[this.outlineStack.length - 1].addItem(text, { expanded: true }));
       }
-    } else {
-      this.outlineStack.push(this.outlineStack[this.outlineStack.length - 1].addItem(text, { expanded: true }));
     }
-    console.log(`Heading, Depth: ${heading.depth}, text: ${text}, stack length: ${this.outlineStack.length}, stack: ${this.outlineStack}`);
 
     this.doc.y += this.settings.headerGapBefore(heading.depth);
     this.doc.font(this.settings.headerFontName(heading.depth));

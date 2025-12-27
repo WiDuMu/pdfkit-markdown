@@ -93,9 +93,6 @@ export class MarkdownRenderer {
       case "heading":
         this.handleHeading(child);
         break;
-      case "link":
-        this.handleLink(child);
-        break;
       case "paragraph":
         this.handleParagraph(child);
         break;

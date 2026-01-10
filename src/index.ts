@@ -36,8 +36,8 @@ export interface PdfkitMarkdownSettings {
   headerGapBefore: (depth: number) => number;
   /** Function to determine gap size after a header by depth */
   headerGapAfter: (depth: number) => number;
-  /** Add outlines (bookmarks) based on the header */
-  displayHeaderOutlines: boolean;
+  /** Add outlines (bookmarks) based on the header depth */
+  headerOutlines: (depth:number) => boolean;
   /** Throw error on unsupported markdown feature, otherwise silently ignored */
   throwOnUnsupported: boolean;
 }
@@ -60,7 +60,7 @@ export class MarkdownRenderer {
     headerFontSize: (h) => 20 - h * 1.5,
     headerGapBefore: () => 12,
     headerGapAfter: () => 8,
-    displayHeaderOutlines: true,
+    headerOutlines: () => true,
     fontSize: 10,
     throwOnUnsupported: false,
   };
@@ -185,7 +185,7 @@ export class MarkdownRenderer {
   }
 
   private handleHeading(heading: MDAST.Heading) {
-    if (this.settings.displayHeaderOutlines) {
+    if (this.settings.headerOutlines(heading.depth)) {
       const text = heading.children.find(child => child.type == "text")?.value;
       if (text) {
         this.outlineStack.splice(heading.depth);
